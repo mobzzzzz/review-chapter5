@@ -1,5 +1,6 @@
 package sparta.nbcamp.reviewchapter5.domain.user.model
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -14,9 +15,8 @@ class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
+    @Column(unique = true)
     val username: String,
 
     val password: String,
-
-    val nickname: String,
 ) : BaseTimeEntity()
