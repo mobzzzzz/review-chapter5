@@ -1,5 +1,7 @@
 package sparta.nbcamp.reviewchapter5.domain.user.controller
 
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -25,8 +27,19 @@ class UserController(
     }
 
     @PostMapping("/sign-in")
-    fun signin(@RequestBody request: SignInRequest): ResponseEntity<SignInResponse> {
-        return ResponseEntity.ok(userService.signIn(request))
+    fun signin(@RequestBody request: SignInRequest, response: HttpServletResponse): ResponseEntity<SignInResponse> {
+        val signInResponse = userService.signIn(request)
+
+        val cookie = ResponseCookie.from("refreshToken", signInResponse.refreshToken)
+            .path("/")
+            .httpOnly(true)
+            .maxAge(7 * 24 * 60 * 60)
+            .sameSite("None")
+            .build()
+
+        response.addHeader("Set-Cookie", cookie.toString())
+
+        return ResponseEntity.ok(signInResponse.copy(refreshToken = "http-only"))
     }
 
     @GetMapping("/users/exists-username")
