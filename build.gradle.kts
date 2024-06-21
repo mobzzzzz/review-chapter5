@@ -26,6 +26,7 @@ repositories {
     mavenCentral()
 }
 
+val jjwtVersion = "0.12.5"
 val queryDslVersion = "5.0.0"
 
 dependencies {
@@ -36,8 +37,11 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.querydsl:querydsl-jpa:$queryDslVersion:jakarta")
+    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
 
     runtimeOnly("com.h2database:h2")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
 
     kapt("com.querydsl:querydsl-apt:$queryDslVersion:jakarta")
 

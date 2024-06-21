@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import sparta.nbcamp.reviewchapter5.domain.user.dto.request.SignInRequest
 import sparta.nbcamp.reviewchapter5.domain.user.dto.request.SignUpRequest
 import sparta.nbcamp.reviewchapter5.domain.user.dto.response.ExistsUsernameResponse
+import sparta.nbcamp.reviewchapter5.domain.user.dto.response.SignInResponse
 import sparta.nbcamp.reviewchapter5.domain.user.dto.response.UserResponse
 import sparta.nbcamp.reviewchapter5.domain.user.service.UserService
 
@@ -17,9 +19,14 @@ import sparta.nbcamp.reviewchapter5.domain.user.service.UserService
 class UserController(
     private val userService: UserService
 ) {
-    @PostMapping("/signup")
+    @PostMapping("/sign-up")
     fun signup(@RequestBody request: SignUpRequest): ResponseEntity<UserResponse> {
-        return ResponseEntity.ok(userService.signup(request))
+        return ResponseEntity.ok(userService.signUp(request))
+    }
+
+    @PostMapping("/sign-in")
+    fun signin(@RequestBody request: SignInRequest): ResponseEntity<SignInResponse> {
+        return ResponseEntity.ok(userService.signIn(request))
     }
 
     @GetMapping("/users/exists-username")

@@ -5,4 +5,5 @@ import sparta.nbcamp.reviewchapter5.domain.user.model.User
 
 interface UserRepository : JpaRepository<User, Long>, CustomUserRepository {
     fun existsByUsername(username: String): Boolean
+    fun findByUsername(username: String): User?
 }
