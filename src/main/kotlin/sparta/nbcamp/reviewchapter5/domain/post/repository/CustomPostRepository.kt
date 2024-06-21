@@ -1,0 +1,3 @@
+package sparta.nbcamp.reviewchapter5.domain.post.repository
+
+interface CustomPostRepository
