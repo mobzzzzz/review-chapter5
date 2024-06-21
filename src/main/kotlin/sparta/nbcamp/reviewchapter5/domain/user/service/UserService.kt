@@ -1,26 +1,23 @@
 package sparta.nbcamp.reviewchapter5.domain.user.service
 
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.stereotype.Service
 import sparta.nbcamp.reviewchapter5.domain.user.dto.request.SignUpRequest
 import sparta.nbcamp.reviewchapter5.domain.user.dto.response.ExistsUsernameResponse
 import sparta.nbcamp.reviewchapter5.domain.user.dto.response.UserResponse
-import sparta.nbcamp.reviewchapter5.domain.user.repository.UserRepository
 
-@Service
-class UserService(
-    private val userRepository: UserRepository,
+interface UserService {
+    /**
+     * 새로운 사용자를 등록합니다.
+     *
+     * @param request 사용자 세부 정보를 포함하는 등록 요청
+     * @return 새로 생성된 사용자의 세부 정보를 포함하는 응답
+     */
+    fun signup(request: SignUpRequest): UserResponse
 
-    private val encoder: PasswordEncoder
-) {
-    fun signup(request: SignUpRequest): UserResponse {
-        return check(!userRepository.existsByUsername(request.username)) { "중복된 아이디입니다." }
-            .run { userRepository.save(request.toEntity(encoder)) }
-            .let { UserResponse.from(it) }
-    }
-
-    fun existsUsername(username: String): ExistsUsernameResponse {
-        return userRepository.existsByUsername(username)
-            .let { ExistsUsernameResponse.of(it) }
-    }
+    /**
+     * 사용자 이름이 이미 존재하는지 확인합니다.
+     *
+     * @param username 확인할 사용자 이름
+     * @return 사용자 이름이 존재하는지 여부를 나타내는 응답
+     */
+    fun existsUsername(username: String): ExistsUsernameResponse
 }

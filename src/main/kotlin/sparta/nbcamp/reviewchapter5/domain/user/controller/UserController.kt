@@ -21,7 +21,7 @@ class UserController(
     fun signup(@RequestBody request: SignUpRequest): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(userService.signup(request))
     }
-    
+
     @GetMapping("/users/exists-username")
     fun existsUsername(@RequestParam username: String): ResponseEntity<ExistsUsernameResponse> {
         return ResponseEntity.ok(userService.existsUsername(username))
