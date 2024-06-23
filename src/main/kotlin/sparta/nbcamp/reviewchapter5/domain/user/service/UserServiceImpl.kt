@@ -9,7 +9,7 @@ import sparta.nbcamp.reviewchapter5.domain.user.dto.response.SignInResponse
 import sparta.nbcamp.reviewchapter5.domain.user.dto.response.UserResponse
 import sparta.nbcamp.reviewchapter5.domain.user.model.User
 import sparta.nbcamp.reviewchapter5.domain.user.repository.UserRepository
-import sparta.nbcamp.reviewchapter5.infra.jwt.JwtPlugin
+import sparta.nbcamp.reviewchapter5.infra.security.jwt.JwtPlugin
 
 @Service
 class UserServiceImpl(

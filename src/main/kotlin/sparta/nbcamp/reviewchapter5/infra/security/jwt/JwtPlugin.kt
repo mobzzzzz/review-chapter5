@@ -1,4 +1,4 @@
-package sparta.nbcamp.reviewchapter5.infra.jwt
+package sparta.nbcamp.reviewchapter5.infra.security.jwt
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jws

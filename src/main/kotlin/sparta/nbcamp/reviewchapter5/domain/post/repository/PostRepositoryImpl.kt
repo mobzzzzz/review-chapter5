@@ -24,7 +24,7 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
             .fetch()
 
         if (postIds.isEmpty()) {
-            return PageImpl(emptyList(), pageable, 0)
+            return PageImpl(emptyList(), pageable, 0L)
         }
 
         val postList = queryFactory.selectFrom(post)
@@ -37,8 +37,9 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
         val totalCount = queryFactory.select(post.count())
             .from(post)
             .fetchOne()
+            ?: 0L
 
-        return PageImpl(postList, pageable, totalCount ?: 0)
+        return PageImpl(postList, pageable, totalCount)
     }
 
     override fun searchByKeyword(searchType: String, keyword: String, pageable: Pageable): Page<Post> {
@@ -57,7 +58,7 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
             .fetch()
 
         if (postIds.isEmpty()) {
-            return PageImpl(emptyList(), pageable, 0)
+            return PageImpl(emptyList(), pageable, 0L)
         }
 
         val postList = queryFactory.selectFrom(post)
@@ -71,8 +72,9 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
             .from(post)
             .where(whereClause)
             .fetchOne()
+            ?: 0L
 
-        return PageImpl(postList, pageable, totalCount ?: 0)
+        return PageImpl(postList, pageable, totalCount)
     }
 
     private fun getOrderSpecifiers(pageable: Pageable): Array<OrderSpecifier<*>> {

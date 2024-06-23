@@ -1,7 +1,7 @@
 package sparta.nbcamp.reviewchapter5.domain.user.dto.response
 
 import sparta.nbcamp.reviewchapter5.domain.user.model.User
-import sparta.nbcamp.reviewchapter5.infra.jwt.JwtPlugin
+import sparta.nbcamp.reviewchapter5.infra.security.jwt.JwtPlugin
 
 data class SignInResponse(
     val accessToken: String,
