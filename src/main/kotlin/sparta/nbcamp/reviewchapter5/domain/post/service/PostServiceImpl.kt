@@ -1,9 +1,28 @@
 package sparta.nbcamp.reviewchapter5.domain.post.service
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import sparta.nbcamp.reviewchapter5.domain.post.dto.response.PostResponse
 import sparta.nbcamp.reviewchapter5.domain.post.repository.PostRepository
+import sparta.nbcamp.reviewchapter5.exception.ModelNotFoundException
 
 @Service
 class PostServiceImpl(
     private val postRepository: PostRepository
-) : PostService
+) : PostService {
+    override fun getPostList(pageable: Pageable): Page<PostResponse> {
+        return postRepository.findByPageableWithUser(pageable).map { PostResponse.from(it) }
+    }
+
+    override fun getPost(postId: Long): PostResponse {
+        return postRepository.findByIdOrNull(postId)
+            ?.let { PostResponse.from(it) }
+            ?: throw ModelNotFoundException("Post", postId)
+    }
+
+    override fun searchPostList(searchType: String, keyword: String, pageable: Pageable): Page<PostResponse> {
+        return postRepository.searchByKeyword(searchType, keyword, pageable).map { PostResponse.from(it) }
+    }
+}

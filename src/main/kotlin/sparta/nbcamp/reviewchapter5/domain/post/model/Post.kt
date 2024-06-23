@@ -7,6 +7,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import sparta.nbcamp.reviewchapter5.domain.common.BaseTimeEntity
 import sparta.nbcamp.reviewchapter5.domain.user.model.User
 
 @Entity
@@ -23,4 +24,4 @@ class Post(
     @ManyToOne
     @JoinColumn(name = "user_id")
     var user: User,
-)
+) : BaseTimeEntity()
