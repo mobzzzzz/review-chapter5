@@ -8,6 +8,10 @@ data class SignUpRequest(
     val password: String,
     val confirmPassword: String
 ) {
+    init {
+        validate()
+    }
+    
     fun validate() {
         require(username.length > 3) { "Username must be longer than 3" }
         require(username.matches(Regex("^[a-zA-Z0-9]*$"))) { "Username only alphabet and number allowed" }

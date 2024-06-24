@@ -2,7 +2,9 @@ package sparta.nbcamp.reviewchapter5.domain.post.service
 
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import sparta.nbcamp.reviewchapter5.domain.post.dto.request.CreatePostRequest
 import sparta.nbcamp.reviewchapter5.domain.post.dto.response.PostResponse
+import sparta.nbcamp.reviewchapter5.infra.security.UserPrincipal
 
 interface PostService {
     /**
@@ -30,4 +32,13 @@ interface PostService {
      * @return 검색된 게시글 목록
      */
     fun searchPostList(searchType: String, keyword: String, pageable: Pageable): Page<PostResponse>
+
+    /**
+     * 게시글 작성
+     *
+     * @param request 게시글 작성 요청
+     * @param principal 사용자 정보
+     * @return 작성된 게시글 정보
+     */
+    fun createPost(request: CreatePostRequest, principal: UserPrincipal): PostResponse
 }
