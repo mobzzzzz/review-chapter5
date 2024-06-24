@@ -1,5 +1,6 @@
 package sparta.nbcamp.reviewchapter5.domain.post.model
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -38,7 +39,7 @@ class Post(
     @JoinColumn(name = "category_id")
     var category: Category,
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
     var postTags: Set<PostTag> = hashSetOf()
 ) : BaseTimeEntity() {
     val tagList: List<Tag>
