@@ -13,6 +13,7 @@ import jakarta.persistence.Table
 import sparta.nbcamp.reviewchapter5.domain.common.BaseTimeEntity
 import sparta.nbcamp.reviewchapter5.domain.post.model.category.Category
 import sparta.nbcamp.reviewchapter5.domain.post.model.tag.PostTag
+import sparta.nbcamp.reviewchapter5.domain.post.model.tag.Tag
 import sparta.nbcamp.reviewchapter5.domain.user.model.User
 
 @Entity
@@ -40,6 +41,6 @@ class Post(
     @OneToMany(mappedBy = "post")
     var postTags: Set<PostTag> = hashSetOf()
 ) : BaseTimeEntity() {
-    val tagList: List<String>
-        get() = postTags.map { it.tag.name }
+    val tagList: List<Tag>
+        get() = postTags.map { it.tag }
 }
