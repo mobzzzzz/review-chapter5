@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import sparta.nbcamp.reviewchapter5.domain.common.StopWatch
 import sparta.nbcamp.reviewchapter5.domain.post.dto.request.CreatePostRequest
 import sparta.nbcamp.reviewchapter5.domain.post.dto.response.PostResponse
@@ -35,6 +36,14 @@ class PostServiceImpl(
         return postRepository.searchByKeyword(searchType, keyword, pageable).map { PostResponse.from(it) }
     }
 
+    @StopWatch
+    @Transactional
+    override fun filterPosts(searchCondition: MutableMap<String, String>, pageable: Pageable): Page<PostResponse> {
+        return postRepository.filterPostList(searchCondition, pageable).map { PostResponse.from(it) }
+    }
+
+    @StopWatch
+    @Transactional
     override fun createPost(request: CreatePostRequest, principal: UserPrincipal): PostResponse {
         return userRepository.findByIdOrNull(principal.id)
             ?.let { request.toEntity(it) }

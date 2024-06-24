@@ -64,6 +64,35 @@ class PostController(
         }
     }
 
+    @GetMapping("/filter")
+    fun filterPosts(
+        @RequestParam(required = false) title: String?,
+        @RequestParam(required = false) tag: String?,
+        @RequestParam(required = false) category: String?,
+        @RequestParam(required = false) status: String?,
+        @RequestParam(required = false) daysAgo: Long?,
+        @PageableDefault(
+            page = 1,
+            size = 20,
+            sort = ["createdAt"],
+            direction = Sort.Direction.DESC
+        ) pageable: Pageable
+    ): ResponseEntity<Page<PostResponse>> {
+        val searchCondition = mutableMapOf<String, String>()
+        title?.let { searchCondition["title"] = it }
+        tag?.let { searchCondition["tag"] = it }
+        category?.let { searchCondition["category"] = it }
+        status?.let { searchCondition["status"] = it }
+        daysAgo?.let { searchCondition["daysAgo"] = it.toString() }
+
+        return ResponseEntity.ok(
+            postService.filterPosts(
+                searchCondition = searchCondition,
+                pageable = pageable
+            )
+        )
+    }
+
     @PostMapping
     fun createPost(
         @RequestBody request: CreatePostRequest,
