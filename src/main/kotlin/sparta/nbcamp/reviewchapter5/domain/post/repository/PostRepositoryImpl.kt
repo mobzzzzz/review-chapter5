@@ -20,62 +20,44 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
     private val user = QUser.user
 
     override fun findByPageableWithUser(pageable: Pageable): Page<Post> {
-        val postIds = queryFactory.select(post.id)
-            .from(post)
-            .offset(pageable.offset)
-            .limit(pageable.pageSize.toLong())
-            .fetch()
+        val (paginatedPost, totalCount) = queryFactory.basePaging(pageable, post)
 
-        if (postIds.isEmpty()) {
+        if (paginatedPost.isEmpty()) {
             return PageImpl(emptyList(), pageable, 0L)
         }
 
         val postList = queryFactory.selectFrom(post)
-            .where(post.id.`in`(postIds))
+            .where(post.id.`in`(paginatedPost.map { it.id }))
             .leftJoin(post.user, user)
             .fetchJoin()
             .orderBy(*getOrderSpecifiers(pageable))
             .fetch()
-
-        val totalCount = queryFactory.select(post.count())
-            .from(post)
-            .fetchOne()
-            ?: 0L
 
         return PageImpl(postList, pageable, totalCount)
     }
 
     override fun searchByKeyword(searchType: String, keyword: String, pageable: Pageable): Page<Post> {
-        val whereClause = when (searchType) {
-            "title_content" -> post.title.contains(keyword).or(post.content.contains(keyword))
-            "title" -> post.title.contains(keyword)
-            "content" -> post.content.contains(keyword)
-            else -> BooleanBuilder()
-        }
+        val whereClause = BooleanBuilder().and(
+            when (searchType) {
+                "title_content" -> post.title.contains(keyword).or(post.content.contains(keyword))
+                "title" -> post.title.contains(keyword)
+                "content" -> post.content.contains(keyword)
+                else -> null
+            }
+        )
 
-        val postIds = queryFactory.select(post.id)
-            .from(post)
-            .where(whereClause)
-            .offset(pageable.offset)
-            .limit(pageable.pageSize.toLong())
-            .fetch()
+        val (paginatedPost, totalCount) = queryFactory.basePaging(pageable, post, whereClause)
 
-        if (postIds.isEmpty()) {
+        if (paginatedPost.isEmpty()) {
             return PageImpl(emptyList(), pageable, 0L)
         }
 
         val postList = queryFactory.selectFrom(post)
-            .where(post.id.`in`(postIds))
+            .where(post.id.`in`(paginatedPost.map { it.id }))
             .leftJoin(post.user, user)
             .fetchJoin()
             .orderBy(*getOrderSpecifiers(pageable))
             .fetch()
-
-        val totalCount = queryFactory.select(post.count())
-            .from(post)
-            .where(whereClause)
-            .fetchOne()
-            ?: 0L
 
         return PageImpl(postList, pageable, totalCount)
     }
@@ -83,29 +65,18 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
     override fun filterPostList(searchCondition: MutableMap<String, String>, pageable: Pageable): Page<Post> {
         val filteredBuilder = filteredBooleanBuilder(searchCondition)
 
-        val postIds = queryFactory.select(post.id)
-            .from(post)
-            .where(filteredBuilder)
-            .offset(pageable.offset)
-            .limit(pageable.pageSize.toLong())
-            .fetch()
+        val (paginatedPost, totalCount) = queryFactory.basePaging(pageable, post, filteredBuilder)
 
-        if (postIds.isEmpty()) {
+        if (paginatedPost.isEmpty()) {
             return PageImpl(emptyList(), pageable, 0L)
         }
 
         val postList = queryFactory.selectFrom(post)
-            .where(post.id.`in`(postIds))
+            .where(post.id.`in`(paginatedPost.map { it.id }))
             .leftJoin(post.user, user)
             .fetchJoin()
             .orderBy(*getOrderSpecifiers(pageable))
             .fetch()
-
-        val totalCount = queryFactory.select(post.count())
-            .from(post)
-            .where(filteredBuilder)
-            .fetchOne()
-            ?: 0L
 
         return PageImpl(postList, pageable, totalCount)
     }
