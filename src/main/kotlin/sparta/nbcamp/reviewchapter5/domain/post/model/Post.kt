@@ -40,7 +40,7 @@ class Post(
     var category: Category,
 
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var postTags: Set<PostTag> = hashSetOf()
+    var postTags: MutableSet<PostTag> = mutableSetOf()
 ) : BaseTimeEntity() {
     val tagList: List<Tag>
         get() = postTags.map { it.tag }

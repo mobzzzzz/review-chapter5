@@ -19,5 +19,5 @@ class Tag(
     val name: String,
 
     @OneToMany(mappedBy = "tag")
-    var postTags: Set<PostTag> = hashSetOf()
+    var postTags: MutableSet<PostTag> = mutableSetOf()
 )
