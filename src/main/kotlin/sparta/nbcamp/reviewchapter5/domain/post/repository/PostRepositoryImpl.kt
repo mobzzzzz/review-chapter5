@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository
 import sparta.nbcamp.reviewchapter5.domain.post.model.Post
 import sparta.nbcamp.reviewchapter5.domain.post.model.PostStatus
 import sparta.nbcamp.reviewchapter5.domain.post.model.QPost
+import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.domain.user.model.QUser
 import sparta.nbcamp.reviewchapter5.infra.querydsl.QueryDslSupport
 import java.time.LocalDateTime
@@ -36,13 +37,13 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
         return PageImpl(postList, pageable, totalCount)
     }
 
-    override fun searchByKeyword(searchType: String, keyword: String, pageable: Pageable): Page<Post> {
+    override fun searchByKeyword(searchType: PostSearchType, keyword: String, pageable: Pageable): Page<Post> {
         val whereClause = BooleanBuilder().and(
             when (searchType) {
-                "title_content" -> post.title.contains(keyword).or(post.content.contains(keyword))
-                "title" -> post.title.contains(keyword)
-                "content" -> post.content.contains(keyword)
-                else -> null
+                PostSearchType.TITLE_CONTENT -> post.title.contains(keyword).or(post.content.contains(keyword))
+                PostSearchType.TITLE -> post.title.contains(keyword)
+                PostSearchType.CONTENT -> post.content.contains(keyword)
+                PostSearchType.NONE -> null
             }
         )
 

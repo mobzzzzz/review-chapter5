@@ -9,6 +9,7 @@ import sparta.nbcamp.reviewchapter5.domain.common.StopWatch
 import sparta.nbcamp.reviewchapter5.domain.post.dto.request.CreatePostRequest
 import sparta.nbcamp.reviewchapter5.domain.post.dto.response.PostResponse
 import sparta.nbcamp.reviewchapter5.domain.post.repository.PostRepository
+import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.domain.user.repository.UserRepository
 import sparta.nbcamp.reviewchapter5.exception.ModelNotFoundException
 import sparta.nbcamp.reviewchapter5.infra.security.UserPrincipal
@@ -32,7 +33,7 @@ class PostServiceImpl(
     }
 
     @StopWatch
-    override fun searchPostList(searchType: String, keyword: String, pageable: Pageable): Page<PostResponse> {
+    override fun searchPostList(searchType: PostSearchType, keyword: String, pageable: Pageable): Page<PostResponse> {
         return postRepository.searchByKeyword(searchType, keyword, pageable).map { PostResponse.from(it) }
     }
 

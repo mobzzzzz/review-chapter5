@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import sparta.nbcamp.reviewchapter5.domain.post.dto.request.CreatePostRequest
 import sparta.nbcamp.reviewchapter5.domain.post.dto.response.PostResponse
+import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.infra.security.UserPrincipal
 
 interface PostService {
@@ -31,7 +32,7 @@ interface PostService {
      * @param pageable 페이징 정보
      * @return 검색된 게시글 목록
      */
-    fun searchPostList(searchType: String, keyword: String, pageable: Pageable): Page<PostResponse>
+    fun searchPostList(searchType: PostSearchType, keyword: String, pageable: Pageable): Page<PostResponse>
 
     /**
      * 게시글 필터링

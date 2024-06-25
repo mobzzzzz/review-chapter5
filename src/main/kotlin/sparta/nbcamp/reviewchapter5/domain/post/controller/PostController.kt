@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 import sparta.nbcamp.reviewchapter5.domain.post.dto.request.CreatePostRequest
 import sparta.nbcamp.reviewchapter5.domain.post.dto.response.PostResponse
 import sparta.nbcamp.reviewchapter5.domain.post.service.PostService
+import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.infra.security.UserPrincipal
 
 @RestController
@@ -51,17 +52,14 @@ class PostController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<PostResponse>> {
-        return when (searchType) {
-            "title_content", "title", "content" -> ResponseEntity.ok(
-                postService.searchPostList(
-                    searchType,
-                    keyword,
-                    pageable
-                )
-            )
-
-            else -> ResponseEntity.badRequest().build()
+        val postSearchType = when (searchType.lowercase()) {
+            "title_content", "titlecontent" -> PostSearchType.TITLE_CONTENT
+            "title" -> PostSearchType.TITLE
+            "content" -> PostSearchType.CONTENT
+            else -> PostSearchType.NONE
         }
+
+        return ResponseEntity.ok(postService.searchPostList(postSearchType, keyword, pageable))
     }
 
     @GetMapping("/filter")
