@@ -17,7 +17,7 @@ data class CreatePostRequest(
         require(content.length < 5000) { "Content must be shorter than 5000" }
     }
 
-    fun toEntity(user: User, category: Category = Category(name = "Free")): Post {
+    fun toEntity(user: User, category: Category? = null): Post {
         return Post(
             title = title,
             content = content,

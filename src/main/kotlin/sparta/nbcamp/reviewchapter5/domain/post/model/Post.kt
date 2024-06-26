@@ -33,11 +33,11 @@ class Post(
     var user: User,
 
     @Enumerated(EnumType.STRING)
-    var status: PostStatus = PostStatus.RECOMMEND,
+    var status: PostStatus = PostStatus.NORMAL,
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    var category: Category,
+    var category: Category? = null,
 
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
     var postTags: MutableSet<PostTag> = mutableSetOf()

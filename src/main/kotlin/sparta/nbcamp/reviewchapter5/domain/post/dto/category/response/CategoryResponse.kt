@@ -7,9 +7,13 @@ data class CategoryResponse(
     val name: String
 ) {
     companion object {
-        fun from(category: Category) = CategoryResponse(
-            id = category.id!!,
-            name = category.name
-        )
+        fun from(category: Category?): CategoryResponse? {
+            return category?.let {
+                CategoryResponse(
+                    id = it.id!!,
+                    name = it.name
+                )
+            }
+        }
     }
 }
