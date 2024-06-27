@@ -3,6 +3,7 @@ package sparta.nbcamp.reviewchapter5.domain.post.dto.response
 import sparta.nbcamp.reviewchapter5.domain.post.dto.category.response.CategoryResponse
 import sparta.nbcamp.reviewchapter5.domain.post.dto.tag.response.TagResponse
 import sparta.nbcamp.reviewchapter5.domain.post.model.Post
+import sparta.nbcamp.reviewchapter5.domain.post.model.tag.Tag
 import sparta.nbcamp.reviewchapter5.domain.user.dto.response.UserResponse
 import java.time.LocalDateTime
 
@@ -18,7 +19,7 @@ data class PostResponse(
     val tagList: List<TagResponse> = emptyList(),
 ) {
     companion object {
-        fun from(post: Post) = PostResponse(
+        fun from(post: Post, tagList: Set<Tag> = emptySet()) = PostResponse(
             id = post.id!!,
             title = post.title,
             content = post.content,
@@ -27,7 +28,7 @@ data class PostResponse(
             updatedAt = post.updatedAt,
             user = UserResponse.from(post.user),
             category = post.category.let { CategoryResponse.from(it) },
-            tagList = post.tagList.map { TagResponse.from(it) }
+            tagList = tagList.map { TagResponse.from(it) }
         )
     }
 }

@@ -3,6 +3,7 @@ package sparta.nbcamp.reviewchapter5.domain.post.repository
 import com.querydsl.core.BooleanBuilder
 import com.querydsl.core.types.OrderSpecifier
 import com.querydsl.core.types.dsl.BooleanExpression
+import com.querydsl.jpa.JPAExpressions
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository
 import sparta.nbcamp.reviewchapter5.domain.post.model.Post
 import sparta.nbcamp.reviewchapter5.domain.post.model.PostStatus
 import sparta.nbcamp.reviewchapter5.domain.post.model.QPost
+import sparta.nbcamp.reviewchapter5.domain.post.model.tag.QPostTag
 import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.domain.user.model.QUser
 import sparta.nbcamp.reviewchapter5.infra.querydsl.QueryDslSupport
@@ -19,6 +21,7 @@ import java.time.LocalDateTime
 class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
     private val post = QPost.post
     private val user = QUser.user
+    private val postTag = QPostTag.postTag
 
     override fun findByPageableWithUser(pageable: Pageable): Page<Post> {
         val (paginatedPost, totalCount) = queryFactory.basePaging(pageable, post)
@@ -103,7 +106,11 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
     }
 
     private fun tagLike(tag: String): BooleanExpression {
-        return post.postTags.any().tag.name.contains(tag)
+        val subQuery = JPAExpressions.select(postTag.post.id)
+            .from(postTag)
+            .where(postTag.tag.name.contains(tag))
+
+        return post.id.`in`(subQuery)
     }
 
     private fun stateEq(stateCode: String): BooleanExpression? {
