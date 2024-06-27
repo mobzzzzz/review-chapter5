@@ -40,9 +40,9 @@ class PostServiceDBTest @Autowired constructor(
 
     @BeforeEach
     fun setUp() {
-        val category = categoryRepository.saveAndFlush(PostRepositoryTest.DEFAULT_CATEGORY)
-        val tag = tagRepository.saveAndFlush(PostRepositoryTest.DEFAULT_TAG)
-        val userList = userRepository.saveAllAndFlush(PostRepositoryTest.DEFAULT_USER_LIST)
+        val category = categoryRepository.saveAndFlush(DEFAULT_CATEGORY)
+        val tag = tagRepository.saveAndFlush(DEFAULT_TAG)
+        val userList = userRepository.saveAllAndFlush(DEFAULT_USER_LIST)
 
         defaultPostList = postRepository.saveAllAndFlush((1..10).map { index ->
             Post(
