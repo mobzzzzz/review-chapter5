@@ -40,11 +40,13 @@ class PostServiceImpl(
         return postRepository.searchByKeyword(searchType, keyword, pageable)
             .let { postPage ->
                 val postIds = postPage.mapNotNull { it.id }
-                val tagList = postTagRepository.findTagByPostIdIn(postIds)
-                    .map { it.tag }
-                    .toSet()
+                val postTagList = postTagRepository
+                    .findTagByPostIdIn(postIds)
+                    .groupBy { it.post.id }
 
-                postPage.map { PostResponse.from(it, tagList) }
+                postPage.map { post ->
+                    PostResponse.from(post, postTagList[post.id!!]?.map { postTag -> postTag.tag }?.toSet()!!)
+                }
             }
     }
 
