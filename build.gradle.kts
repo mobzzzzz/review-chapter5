@@ -26,10 +26,17 @@ repositories {
     mavenCentral()
 }
 
+allOpen {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
+}
+
 val jjwtVersion = "0.12.5"
 val queryDslVersion = "5.0.0"
 val mockkVersion = "1.13.9"
 val kotestVersion = "5.8.1"
+val fixtureMonkeyVersion = "1.0.14"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -55,6 +62,7 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+    testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter-kotlin:$fixtureMonkeyVersion")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
