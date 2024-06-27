@@ -11,7 +11,10 @@ import org.springframework.stereotype.Repository
 import sparta.nbcamp.reviewchapter5.domain.post.model.Post
 import sparta.nbcamp.reviewchapter5.domain.post.model.PostStatus
 import sparta.nbcamp.reviewchapter5.domain.post.model.QPost
+import sparta.nbcamp.reviewchapter5.domain.post.model.category.QCategory.category
+import sparta.nbcamp.reviewchapter5.domain.post.model.tag.PostTag
 import sparta.nbcamp.reviewchapter5.domain.post.model.tag.QPostTag
+import sparta.nbcamp.reviewchapter5.domain.post.model.tag.QTag.tag
 import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.domain.user.model.QUser
 import sparta.nbcamp.reviewchapter5.infra.querydsl.QueryDslSupport
@@ -23,24 +26,21 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
     private val user = QUser.user
     private val postTag = QPostTag.postTag
 
-    override fun findByPageableWithUser(pageable: Pageable): Page<Post> {
-        val (paginatedPost, totalCount) = queryFactory.basePaging(pageable, post)
+    override fun findByPageableWithUser(pageable: Pageable): Page<Pair<Post, List<PostTag>>> {
+        val (paginatedPostIds, totalCount) = basePagingIds(pageable)
 
-        if (paginatedPost.isEmpty()) {
+        if (paginatedPostIds.isEmpty()) {
             return PageImpl(emptyList(), pageable, 0L)
         }
 
-        val postList = queryFactory.selectFrom(post)
-            .where(post.id.`in`(paginatedPost.map { it.id }))
-            .leftJoin(post.user, user)
-            .fetchJoin()
-            .orderBy(*getOrderSpecifiers(pageable))
-            .fetch()
-
-        return PageImpl(postList, pageable, totalCount)
+        return PageImpl(joinedPostListWithTagByIds(paginatedPostIds), pageable, totalCount)
     }
 
-    override fun searchByKeyword(searchType: PostSearchType, keyword: String, pageable: Pageable): Page<Post> {
+    override fun searchByKeyword(
+        searchType: PostSearchType,
+        keyword: String,
+        pageable: Pageable
+    ): Page<Pair<Post, List<PostTag>>> {
         val whereClause = BooleanBuilder().and(
             when (searchType) {
                 PostSearchType.TITLE_CONTENT -> post.title.contains(keyword).or(post.content.contains(keyword))
@@ -50,39 +50,67 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
             }
         )
 
-        val (paginatedPost, totalCount) = queryFactory.basePaging(pageable, post, whereClause)
+        val (paginatedPostIds, totalCount) = basePagingIds(pageable, whereClause)
 
-        if (paginatedPost.isEmpty()) {
+        if (paginatedPostIds.isEmpty()) {
             return PageImpl(emptyList(), pageable, 0L)
         }
 
-        val postList = queryFactory.selectFrom(post)
-            .where(post.id.`in`(paginatedPost.map { it.id }))
-            .leftJoin(post.user, user)
-            .fetchJoin()
-            .orderBy(*getOrderSpecifiers(pageable))
-            .fetch()
-
-        return PageImpl(postList, pageable, totalCount)
+        return PageImpl(joinedPostListWithTagByIds(paginatedPostIds), pageable, totalCount)
     }
 
-    override fun filterPostList(searchCondition: MutableMap<String, String>, pageable: Pageable): Page<Post> {
+    override fun filterPostList(
+        searchCondition: MutableMap<String, String>,
+        pageable: Pageable
+    ): Page<Pair<Post, List<PostTag>>> {
         val filteredBuilder = filteredBooleanBuilder(searchCondition)
 
-        val (paginatedPost, totalCount) = queryFactory.basePaging(pageable, post, filteredBuilder)
+        val (paginatedPostIds, totalCount) = basePagingIds(pageable, filteredBuilder)
 
-        if (paginatedPost.isEmpty()) {
+        if (paginatedPostIds.isEmpty()) {
             return PageImpl(emptyList(), pageable, 0L)
         }
 
-        val postList = queryFactory.selectFrom(post)
-            .where(post.id.`in`(paginatedPost.map { it.id }))
-            .leftJoin(post.user, user)
-            .fetchJoin()
-            .orderBy(*getOrderSpecifiers(pageable))
+        return PageImpl(joinedPostListWithTagByIds(paginatedPostIds), pageable, totalCount)
+    }
+
+    private fun basePagingIds(
+        pageable: Pageable,
+        whereClause: BooleanBuilder? = null
+    ): Pair<List<Long>, Long> {
+        val result = queryFactory.select(post.id)
+            .from(post)
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .where(whereClause)
             .fetch()
 
-        return PageImpl(postList, pageable, totalCount)
+        if (result.isEmpty()) {
+            return Pair(emptyList(), 0L)
+        }
+
+        val totalCount = queryFactory.select(post.count())
+            .from(post)
+            .where(whereClause)
+            .fetchOne()
+            ?: 0L
+
+        return Pair(result, totalCount)
+    }
+
+    private fun joinedPostListWithTagByIds(paginatedPostIds: List<Long>): List<Pair<Post, List<PostTag>>> {
+        return queryFactory
+            .select(post, postTag, tag)
+            .from(post)
+            .leftJoin(post.user, user).fetchJoin()
+            .leftJoin(post.category, category).fetchJoin()
+            .leftJoin(postTag).on(post.id.eq(postTag.post.id))
+            .leftJoin(postTag.tag, tag).fetchJoin()
+            .where(post.id.`in`(paginatedPostIds))
+            .fetch()
+            .groupBy { it.get(post) }
+            .mapValues { it.value.map { tuple -> tuple.get(postTag)!! } }
+            .map { Pair(it.key!!, it.value) }
     }
 
     private fun filteredBooleanBuilder(searchCondition: Map<String, String>): BooleanBuilder {
