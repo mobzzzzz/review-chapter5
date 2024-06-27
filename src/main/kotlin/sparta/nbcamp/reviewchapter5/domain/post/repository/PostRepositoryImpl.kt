@@ -108,7 +108,7 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
 
     private fun joinedPostListWithTagByIds(paginatedPostIds: List<Long>): List<Pair<Post, List<PostTag>>> {
         return queryFactory
-            .select(post, postTag, tag)
+            .select(post, postTag)
             .from(post)
             .leftJoin(post.user, user).fetchJoin()
             .leftJoin(post.category, category).fetchJoin()
