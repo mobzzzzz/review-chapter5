@@ -39,7 +39,7 @@ class PostServiceDBTest @Autowired constructor(
 
     private lateinit var defaultPostList: List<Post>
     private lateinit var defaultUser: User
-    private val postService = PostServiceImpl(postRepository, userRepository)
+    private val postService = PostServiceImpl(postRepository, postTagRepository, userRepository)
 
     @BeforeEach
     fun setUp() {
