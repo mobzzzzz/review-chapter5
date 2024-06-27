@@ -1,5 +1,7 @@
 package sparta.nbcamp.reviewchapter5.domain.post
 
+import com.navercorp.fixturemonkey.FixtureMonkey
+import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,22 +37,24 @@ class PostRepositoryTest @Autowired constructor(
 
     @BeforeEach
     fun setUp() {
-        val category = categoryRepository.saveAndFlush(DEFAULT_CATEGORY)
-        val tag = tagRepository.saveAndFlush(DEFAULT_TAG)
-        val userList = userRepository.saveAllAndFlush(DEFAULT_USER_LIST)
+        val fixtureMonkey = FixtureMonkey.builder()
+            .plugin(KotlinPlugin())
+            .build()
 
-        defaultPostList = postRepository.saveAllAndFlush((1..10).map { index ->
-            Post(
-                title = "sample${index}Title",
-                content = "sample${index}Content",
-                user = if (index % 2 == 0) userList[0] else userList[1],
-                category = category
-            )
+        val category = categoryRepository.saveAndFlush(fixtureMonkey.giveMeOne(Category::class.java))
+        val tag = tagRepository.saveAndFlush(fixtureMonkey.giveMeOne(Tag::class.java))
+        val user = userRepository.saveAndFlush(fixtureMonkey.giveMeOne(User::class.java))
+
+        defaultPostList = postRepository.saveAllAndFlush(
+            fixtureMonkey.giveMeBuilder(Post::class.java)
+                .set("category", category)
+                .set("user", user)
+                .sampleList(10)
+        )
+
+        postTagRepository.saveAllAndFlush(defaultPostList.map {
+            PostTag(post = it, tag = tag)
         })
-
-        defaultPostList.forEach { post ->
-            postTagRepository.saveAndFlush(PostTag(post = post, tag = tag))
-        }
     }
 
     @Test
@@ -69,10 +73,10 @@ class PostRepositoryTest @Autowired constructor(
     @Test
     fun `SearchType 이 NONE 이 아닌 경우 Keyword 에 의해 검색되는지 결과 확인`() {
         // WHEN
-        val result = postRepository.searchByKeyword(PostSearchType.TITLE_CONTENT, "sample1", Pageable.ofSize(10))
+        val result = postRepository.searchByKeyword(PostSearchType.TITLE_CONTENT, "sample", Pageable.ofSize(10))
 
         // THEN
-        result.content.size shouldBe 2
+        result.content.size shouldBe defaultPostList.count { it.title.contains("sample") || it.content.contains("sample") }
     }
 
     @Test
@@ -87,7 +91,7 @@ class PostRepositoryTest @Autowired constructor(
     @Test
     fun `조회된 결과가 10개, PageSize 6일 때 0Page 결과 확인`() {
         // WHEN
-        val result = postRepository.searchByKeyword(PostSearchType.TITLE_CONTENT, "sample", PageRequest.of(0, 6))
+        val result = postRepository.searchByKeyword(PostSearchType.TITLE_CONTENT, "", PageRequest.of(0, 6))
 
         // THEN
         result.content.size shouldBe 6
@@ -102,7 +106,7 @@ class PostRepositoryTest @Autowired constructor(
         // WHEN
         val result = postRepository.searchByKeyword(
             PostSearchType.TITLE_CONTENT,
-            "sample",
+            "",
             PageRequest.of(1, 6)
         )
 
@@ -112,14 +116,5 @@ class PostRepositoryTest @Autowired constructor(
         result.totalPages shouldBe 2
         result.number shouldBe 1
         result.totalElements shouldBe 10
-    }
-
-    companion object {
-        val DEFAULT_CATEGORY = Category(name = "Default Category")
-        val DEFAULT_TAG = Tag(name = "Default Tag")
-        val DEFAULT_USER_LIST = listOf(
-            User(username = "User1", password = "aaaa"),
-            User(username = "User2", password = "aaaa")
-        )
     }
 }
