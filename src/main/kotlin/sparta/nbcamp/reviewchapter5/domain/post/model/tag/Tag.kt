@@ -1,5 +1,6 @@
 package sparta.nbcamp.reviewchapter5.domain.post.model.tag
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -18,6 +19,6 @@ class Tag(
     @Column(unique = true)
     val name: String,
 
-    @OneToMany(mappedBy = "tag")
+    @OneToMany(mappedBy = "tag", cascade = [CascadeType.ALL], orphanRemoval = true)
     var postTags: MutableSet<PostTag> = mutableSetOf()
 )
