@@ -1,5 +1,7 @@
 package sparta.nbcamp.reviewchapter5.domain.post
 
+import com.navercorp.fixturemonkey.FixtureMonkey
+import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,26 +38,29 @@ class PostServiceDBTest @Autowired constructor(
 ) {
 
     private lateinit var defaultPostList: List<Post>
+    private lateinit var defaultUser: User
     private val postService = PostServiceImpl(postRepository, userRepository)
 
     @BeforeEach
     fun setUp() {
-        val category = categoryRepository.saveAndFlush(DEFAULT_CATEGORY)
-        val tag = tagRepository.saveAndFlush(DEFAULT_TAG)
-        val userList = userRepository.saveAllAndFlush(DEFAULT_USER_LIST)
+        val fixtureMonkey = FixtureMonkey.builder()
+            .plugin(KotlinPlugin())
+            .build()
 
-        defaultPostList = postRepository.saveAllAndFlush((1..10).map { index ->
-            Post(
-                title = "sample${index}Title",
-                content = "sample${index}Content",
-                user = if (index % 2 == 0) userList[0] else userList[1],
-                category = category
-            )
+        val category = categoryRepository.saveAndFlush(fixtureMonkey.giveMeOne(Category::class.java))
+        val tag = tagRepository.saveAndFlush(fixtureMonkey.giveMeOne(Tag::class.java))
+        defaultUser = userRepository.saveAndFlush(fixtureMonkey.giveMeOne(User::class.java))
+
+        defaultPostList = postRepository.saveAllAndFlush(
+            fixtureMonkey.giveMeBuilder(Post::class.java)
+                .set("category", category)
+                .set("user", defaultUser)
+                .sampleList(10)
+        )
+
+        postTagRepository.saveAllAndFlush(defaultPostList.map {
+            PostTag(post = it, tag = tag)
         })
-
-        defaultPostList.forEach { post ->
-            postTagRepository.saveAndFlush(PostTag(post = post, tag = tag))
-        }
     }
 
     // Postservice의 getPostList 메서드를 테스트하는 코드입니다.
@@ -71,7 +76,14 @@ class PostServiceDBTest @Autowired constructor(
         result.size shouldBe 10
         result.isLast shouldBe true
         result.totalElements shouldBe 10
-        result.content.count { it.title.startsWith("sample") } shouldBe 10
+        result.content.forEachIndexed { index, postResponse ->
+            postResponse.id shouldBe defaultPostList[index].id
+            postResponse.title shouldBe defaultPostList[index].title
+            postResponse.content shouldBe defaultPostList[index].content
+            postResponse.status shouldBe defaultPostList[index].status.name
+            postResponse.user.id shouldBe defaultUser.id
+            postResponse.user.username shouldBe defaultUser.username
+        }
     }
 
     @Test
@@ -82,7 +94,7 @@ class PostServiceDBTest @Autowired constructor(
             content = "testContent"
         )
 
-        val testUser = userRepository.findByIdOrNull(DEFAULT_USER_LIST[0].id!!)
+        val testUser = userRepository.findByIdOrNull(defaultUser.id!!)
 
         val principal = UserPrincipal(testUser?.id!!)
 
@@ -104,14 +116,5 @@ class PostServiceDBTest @Autowired constructor(
             it.first().content shouldBe "testContent"
             it.first().user.username shouldBe testUser.username
         }
-    }
-
-    companion object {
-        val DEFAULT_CATEGORY = Category(name = "Default Category")
-        val DEFAULT_TAG = Tag(name = "Default Tag")
-        val DEFAULT_USER_LIST = listOf(
-            User(id = 1, username = "User1", password = "aaaa"),
-            User(id = 2, username = "User2", password = "aaaa")
-        )
     }
 }
