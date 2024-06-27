@@ -40,7 +40,7 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
         searchType: PostSearchType,
         keyword: String,
         pageable: Pageable
-    ): Page<Pair<Post, List<PostTag>>> {
+    ): Page<Post> {
         val whereClause = BooleanBuilder().and(
             when (searchType) {
                 PostSearchType.TITLE_CONTENT -> post.title.contains(keyword).or(post.content.contains(keyword))
@@ -56,7 +56,15 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
             return PageImpl(emptyList(), pageable, 0L)
         }
 
-        return PageImpl(joinedPostListWithTagByIds(paginatedPostIds), pageable, totalCount)
+        val postList = queryFactory
+            .select(post)
+            .from(post)
+            .join(post.user, user).fetchJoin()
+            .join(post.category, category).fetchJoin()
+            .where(post.id.`in`(paginatedPostIds))
+            .fetch()
+
+        return PageImpl(postList, pageable, totalCount)
     }
 
     override fun filterPostList(

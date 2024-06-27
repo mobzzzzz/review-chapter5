@@ -12,7 +12,7 @@ interface CustomPostRepository {
         searchType: PostSearchType,
         keyword: String,
         pageable: Pageable
-    ): Page<Pair<Post, List<PostTag>>>
+    ): Page<Post>
 
     fun filterPostList(searchCondition: MutableMap<String, String>, pageable: Pageable): Page<Pair<Post, List<PostTag>>>
 }

@@ -8,6 +8,7 @@ import sparta.nbcamp.reviewchapter5.domain.common.StopWatch
 import sparta.nbcamp.reviewchapter5.domain.post.dto.request.CreatePostRequest
 import sparta.nbcamp.reviewchapter5.domain.post.dto.response.PostResponse
 import sparta.nbcamp.reviewchapter5.domain.post.repository.PostRepository
+import sparta.nbcamp.reviewchapter5.domain.post.repository.tag.PostTagRepository
 import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.domain.user.repository.UserRepository
 import sparta.nbcamp.reviewchapter5.exception.ModelNotFoundException
@@ -16,6 +17,7 @@ import sparta.nbcamp.reviewchapter5.infra.security.UserPrincipal
 @Service
 class PostServiceImpl(
     private val postRepository: PostRepository,
+    private val postTagRepository: PostTagRepository,
     private val userRepository: UserRepository
 ) : PostService {
 
@@ -36,8 +38,14 @@ class PostServiceImpl(
     @StopWatch
     override fun searchPostList(searchType: PostSearchType, keyword: String, pageable: Pageable): Page<PostResponse> {
         return postRepository.searchByKeyword(searchType, keyword, pageable)
-            .map { it.first to it.second.map { postTag -> postTag.tag }.toSet() }
-            .map { PostResponse.from(it.first, it.second) }
+            .let { postPage ->
+                val postIds = postPage.mapNotNull { it.id }
+                val tagList = postTagRepository.findTagByPostIdIn(postIds)
+                    .map { it.tag }
+                    .toSet()
+
+                postPage.map { PostResponse.from(it, tagList) }
+            }
     }
 
     @StopWatch
