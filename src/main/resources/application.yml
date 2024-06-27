@@ -13,6 +13,7 @@ spring:
         format_sql: true
         highlight_sql: true
         ddl-auto: create
+        default_batch_fetch_size: 100
 
 logging:
   level:
