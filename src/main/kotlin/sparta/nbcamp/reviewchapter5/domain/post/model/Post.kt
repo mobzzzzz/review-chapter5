@@ -18,7 +18,7 @@ import sparta.nbcamp.reviewchapter5.domain.user.model.User
 class Post(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    var id: Long? = null,
 
     val title: String,
 
