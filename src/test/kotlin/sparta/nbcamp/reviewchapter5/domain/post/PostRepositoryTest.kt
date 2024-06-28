@@ -63,8 +63,8 @@ class PostRepositoryTest @Autowired constructor(
         defaultPostList.forEach {
             val randomDate = fixtureMonkey.giveMeOne(LocalDateTime::class.java)
 
-            entityManager.createNativeQuery("UPDATE post SET created_at = :pastDate, updated_at = :pastDate WHERE id = :id")
-                .setParameter("pastDate", randomDate)
+            entityManager.createNativeQuery("UPDATE post SET created_at = :randomDate, updated_at = :randomDate WHERE id = :id")
+                .setParameter("randomDate", randomDate)
                 .setParameter("id", it.id)
                 .executeUpdate()
         }
