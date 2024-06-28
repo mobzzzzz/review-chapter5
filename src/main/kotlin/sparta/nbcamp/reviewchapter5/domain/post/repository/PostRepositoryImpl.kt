@@ -127,7 +127,7 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
         searchCondition["title"]?.let { builder.and(titleLike(it)) }
         searchCondition["category"]?.let { builder.and(categoryEq(it)) }
         searchCondition["tag"]?.let { builder.and(tagLike(it)) }
-        searchCondition["status"]?.let { builder.and(stateEq(it)) }
+        searchCondition["status"]?.let { builder.and(statusEq(it)) }
         searchCondition["daysAgo"]?.let { builder.and(withInDays(it)) }
 
         return builder
@@ -149,10 +149,9 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
         return post.id.`in`(subQuery)
     }
 
-    private fun stateEq(stateCode: String): BooleanExpression? {
+    private fun statusEq(status: String): BooleanExpression? {
         return try {
-            val status = PostStatus.valueOf(stateCode)
-            post.status.eq(status)
+            post.status.eq(PostStatus.valueOf(status))
         } catch (e: IllegalArgumentException) {
             null
         }
