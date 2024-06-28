@@ -51,7 +51,7 @@ class PostServiceImpl(
     }
 
     @StopWatch
-    override fun filterPosts(searchCondition: MutableMap<String, String>, pageable: Pageable): Page<PostResponse> {
+    override fun filterPostList(searchCondition: MutableMap<String, String>, pageable: Pageable): Page<PostResponse> {
         return postRepository.filterPostList(searchCondition, pageable)
             .map { it.first to it.second.map { postTag -> postTag.tag }.toSet() }
             .map { PostResponse.from(it.first, it.second) }

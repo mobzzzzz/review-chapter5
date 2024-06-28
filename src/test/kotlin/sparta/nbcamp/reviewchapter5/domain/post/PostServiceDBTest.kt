@@ -22,6 +22,7 @@ import sparta.nbcamp.reviewchapter5.domain.post.repository.category.CategoryRepo
 import sparta.nbcamp.reviewchapter5.domain.post.repository.tag.PostTagRepository
 import sparta.nbcamp.reviewchapter5.domain.post.repository.tag.TagRepository
 import sparta.nbcamp.reviewchapter5.domain.post.service.PostServiceImpl
+import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.domain.user.model.User
 import sparta.nbcamp.reviewchapter5.domain.user.repository.UserRepository
 import sparta.nbcamp.reviewchapter5.infra.security.UserPrincipal
@@ -115,6 +116,49 @@ class PostServiceDBTest @Autowired constructor(
             it.first().title shouldBe "testTitle"
             it.first().content shouldBe "testContent"
             it.first().user.username shouldBe testUser.username
+        }
+    }
+
+    @Test
+    fun `정상적으로 filterPostList()를 통한 필터링 조회가 되는지 확인`() {
+        // given
+        val searchCondition = mutableMapOf(
+            "title" to "a",
+            "status" to "NORMAL"
+        )
+
+        val pageable = PageRequest.of(0, 10)
+
+        // when
+        val result = postService.filterPostList(searchCondition, pageable)
+
+        // then
+        result.content.forEachIndexed { index, postResponse ->
+            postResponse.id shouldBe defaultPostList[index].id
+            postResponse.title shouldBe defaultPostList[index].title
+            postResponse.content shouldBe defaultPostList[index].content
+            postResponse.status shouldBe defaultPostList[index].status.name
+            postResponse.user.id shouldBe defaultUser.id
+            postResponse.user.username shouldBe defaultUser.username
+        }
+    }
+
+    @Test
+    fun `정상적으로 searchPostList()를 통한 검색 조회가 되는지 확인`() {
+        // given
+        val pageable = PageRequest.of(0, 10)
+
+        // when
+        val result = postService.searchPostList(PostSearchType.TITLE_CONTENT, "a", pageable)
+
+        // then
+        result.content.forEachIndexed { index, postResponse ->
+            postResponse.id shouldBe defaultPostList[index].id
+            postResponse.title shouldBe defaultPostList[index].title
+            postResponse.content shouldBe defaultPostList[index].content
+            postResponse.status shouldBe defaultPostList[index].status.name
+            postResponse.user.id shouldBe defaultUser.id
+            postResponse.user.username shouldBe defaultUser.username
         }
     }
 }

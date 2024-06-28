@@ -41,7 +41,7 @@ interface PostService {
      * @param pageable 페이징 정보
      * @return 필터링된 게시글 목록
      */
-    fun filterPosts(searchCondition: MutableMap<String, String>, pageable: Pageable): Page<PostResponse>
+    fun filterPostList(searchCondition: MutableMap<String, String>, pageable: Pageable): Page<PostResponse>
 
     /**
      * 게시글 작성

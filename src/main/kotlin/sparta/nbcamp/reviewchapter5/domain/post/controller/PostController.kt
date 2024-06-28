@@ -84,7 +84,7 @@ class PostController(
         daysAgo?.let { searchCondition["daysAgo"] = it.toString() }
 
         return ResponseEntity.ok(
-            postService.filterPosts(
+            postService.filterPostList(
                 searchCondition = searchCondition,
                 pageable = pageable
             )
