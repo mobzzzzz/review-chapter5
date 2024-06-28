@@ -124,7 +124,10 @@ class PostServiceDBTest @Autowired constructor(
         // given
         val searchCondition = mutableMapOf(
             "title" to "a",
-            "status" to "NORMAL"
+            "category" to "a",
+            "tag" to "a",
+            "status" to "NORMAL",
+            "daysAgo" to "1"
         )
 
         val pageable = PageRequest.of(0, 10)
