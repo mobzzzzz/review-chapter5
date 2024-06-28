@@ -3,6 +3,8 @@ package sparta.nbcamp.reviewchapter5.domain.post
 import com.navercorp.fixturemonkey.FixtureMonkey
 import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
 import io.kotest.matchers.shouldBe
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +24,7 @@ import sparta.nbcamp.reviewchapter5.domain.post.repository.tag.TagRepository
 import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.domain.user.model.User
 import sparta.nbcamp.reviewchapter5.domain.user.repository.UserRepository
+import java.time.LocalDateTime
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -34,6 +37,9 @@ class PostRepositoryTest @Autowired constructor(
     private val userRepository: UserRepository
 ) {
     private lateinit var defaultPostList: List<Post>
+
+    @PersistenceContext
+    private lateinit var entityManager: EntityManager
 
     @BeforeEach
     fun setUp() {
@@ -51,6 +57,17 @@ class PostRepositoryTest @Autowired constructor(
                 .set("user", user)
                 .sampleList(10)
         )
+
+        entityManager.clear()
+
+        defaultPostList.forEach {
+            val randomDate = fixtureMonkey.giveMeOne(LocalDateTime::class.java)
+
+            entityManager.createNativeQuery("UPDATE post SET created_at = :pastDate, updated_at = :pastDate WHERE id = :id")
+                .setParameter("pastDate", randomDate)
+                .setParameter("id", it.id)
+                .executeUpdate()
+        }
 
         postTagRepository.saveAllAndFlush(defaultPostList.map {
             PostTag(post = it, tag = tag)
