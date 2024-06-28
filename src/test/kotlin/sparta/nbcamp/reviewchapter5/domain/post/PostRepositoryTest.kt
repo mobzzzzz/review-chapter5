@@ -22,6 +22,7 @@ import sparta.nbcamp.reviewchapter5.domain.post.repository.tag.TagRepository
 import sparta.nbcamp.reviewchapter5.domain.post.type.PostSearchType
 import sparta.nbcamp.reviewchapter5.domain.user.model.User
 import sparta.nbcamp.reviewchapter5.domain.user.repository.UserRepository
+import java.time.LocalDateTime
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -52,6 +53,17 @@ class PostRepositoryTest @Autowired constructor(
                 .sampleList(10)
         )
 
+        defaultPostList.forEachIndexed { index, post ->
+            if (index % 2 == 0) {
+                val now = LocalDateTime.now()
+                post.createdAt = fixtureMonkey.giveMeBuilder(LocalDateTime::class.java)
+                    .set("year", now.year)
+                    .set("month", now.monthValue)
+                    .set("dayOfMonth", now.dayOfMonth - index)
+                    .sample()
+            }
+        }
+
         postTagRepository.saveAllAndFlush(defaultPostList.map {
             PostTag(post = it, tag = tag)
         })
@@ -59,6 +71,8 @@ class PostRepositoryTest @Autowired constructor(
 
     @Test
     fun `SearchType 이 NONE 일 경우 전체 데이터 조회되는지 확인`() {
+        // GIVEN
+
         // WHEN
         val result1 = postRepository.searchByKeyword(PostSearchType.NONE, "", Pageable.ofSize(10))
         val result2 = postRepository.searchByKeyword(PostSearchType.NONE, "", Pageable.ofSize(6))
