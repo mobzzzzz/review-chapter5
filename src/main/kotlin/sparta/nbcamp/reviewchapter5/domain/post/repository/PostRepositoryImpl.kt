@@ -90,6 +90,7 @@ class PostRepositoryImpl : CustomPostRepository, QueryDslSupport() {
             .from(post)
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
+            .orderBy(*getOrderSpecifiers(pageable))
             .where(whereClause)
             .fetch()
 
