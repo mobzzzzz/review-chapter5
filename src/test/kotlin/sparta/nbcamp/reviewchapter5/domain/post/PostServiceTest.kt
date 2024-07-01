@@ -49,7 +49,9 @@ class PostServiceTest(
             .plugin(KotlinPlugin())
             .build()
 
-        val sampleUser = fixtureMonkey.giveMeBuilder(User::class.java).sample()
+        val sampleUser = fixtureMonkey.giveMeBuilder(User::class.java)
+            .set("id", 1L)
+            .sample()
         val createPostRequest = fixtureMonkey.giveMeOne(CreatePostRequest::class.java)
         val principal = fixtureMonkey.giveMeBuilder(UserPrincipal::class.java)
             .set("id", sampleUser.id)
