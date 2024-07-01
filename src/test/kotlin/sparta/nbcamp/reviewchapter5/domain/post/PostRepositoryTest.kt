@@ -160,8 +160,9 @@ class PostRepositoryTest @Autowired constructor(
     @Test
     fun `태그가 포함된 게시글이 필터링되는지 확인`() {
         // GIVEN
+        val tagKeyword = defaultTag.name.substring(0, 2)
         val searchCondition = mutableMapOf(
-            "tag" to defaultTag.name
+            "tag" to tagKeyword
         )
 
         // WHEN
@@ -170,7 +171,7 @@ class PostRepositoryTest @Autowired constructor(
         // THEN
         result.totalElements shouldBe defaultPostTagList
             .groupBy { it.post.id }
-            .count { (_, postTagList) -> postTagList.any { it.tag.name.contains("a") } }
+            .count { (_, postTagList) -> postTagList.any { it.tag.name.contains(tagKeyword) } }
     }
 
     @Test
